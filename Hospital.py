@@ -3,6 +3,7 @@ from Room import Room
 import pandas as pd
 import math
 import random
+import numpy as np
 import matplotlib.pyplot as plt
 
 ######## READ DATA ###########
@@ -137,8 +138,40 @@ def patient_to_room_arr(pat_arr,patient_data):
         x_arr.append(cord[0])
         y_arr.append(cord[1])
     fig, ax = plt.subplots()
+    u = np.diff(x_arr)
+    v = np.diff(y_arr)
+    u = np.array([2 if x == 0 else x for x in u])
+    v = np.array([2 if x == 0 else x for x in v])
+    pos_x = x_arr[:-1] + u / 2
+    pos_y = y_arr[:-1] + v / 2
+    norm = np.sqrt(abs(u * 2 + v * 2))
     ax.plot(x_arr, y_arr, marker="o")
-    ax.quiver(x_arr, y_arr, angles="xy", zorder=5, pivot="mid")
+    ax.quiver(pos_x, pos_y, u / norm, v / norm, angles="xy", zorder=5, pivot='mid')
+    plt.title("Path to Rooms")
+    plt.show()
+    for i in range(0,len(x_arr)-1):
+        j = i
+        print(i,j)
+        if j >= (len(x_arr)-1):
+            break
+        while x_arr[i] == x_arr[j+1] and y_arr[i] == y_arr[j+1]:
+            x_arr[j + 1] = x_arr[j + 1] + 3
+            y_arr[j + 1] = y_arr[j + 1] + 3
+            if (j+1) < (len(x_arr) - 1):
+                j = j + 1
+            else:
+                break
+    fig, ax = plt.subplots()
+    u = np.diff(x_arr)
+    v = np.diff(y_arr)
+    u = np.array([2 if x == 0 else x for x in u])
+    v = np.array([2 if x == 0 else x for x in v])
+    pos_x = x_arr[:-1] + u / 2
+    pos_y = y_arr[:-1] + v / 2
+    norm = np.sqrt(abs(u * 2 + v * 2))
+    ax.plot(x_arr, y_arr, marker="o")
+    ax.quiver(pos_x, pos_y, u / norm, v / norm, angles="xy", zorder=5, pivot='mid')
+    plt.title("Path to Patients")
     plt.show()
 
 if __name__ == '__main__':
