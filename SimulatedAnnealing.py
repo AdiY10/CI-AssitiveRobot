@@ -17,7 +17,7 @@ Rooms_data = pd.read_csv('Rooms.csv')
 
 ######## Variables ##########
 ROBOT_SPEED = 6
-COST = 2
+COST = 0
 
 
 def init_rooms(Rooms_data):
@@ -29,6 +29,7 @@ def init_rooms(Rooms_data):
 
 def init_patient(Patient_data, r_data):
     patient_array = [Patient(0, Room(0, 0, 0), 0, 0)]
+    patient_array = []
     for patient in Patient_data.iterrows():
         patient_array.append(
             Patient(patient[1]['id'], r_data[patient[1]['room']], patient[1]['urgency'], patient[1]['typeofdisease']))
@@ -133,19 +134,20 @@ def simulated_annealing(matrix, initial_state):
 
         # Check if neighbor is best so far
         cost_diff = get_cost(matrix, current_state) - get_cost(matrix, neighbor)
+        print(cost_diff)
 
         # if the new solution is better, accept it
         if cost_diff > 0:
             solution = neighbor
         # if the new solution is not better, accept it with a probability of e^(-cost/temp)
         else:
-
             if random.uniform(0, 1) < math.exp(-cost_diff / current_temp):
                 solution = neighbor
         # decrement the temperature
         current_temp -= alpha
 
     print_solution(solution)
+    print(get_cost(matrix, solution))
     return solution
 
 
@@ -153,6 +155,7 @@ if __name__ == '__main__':
     room_data = init_rooms(Rooms_data)
     patient_data = init_patient(Patient_data, room_data)
     print(patient_data)
+    print(len(patient_data))
     # dist = distance_matrix(room_data)
 
     # ## time_matrix
@@ -170,7 +173,7 @@ if __name__ == '__main__':
     rand_solution = random_solution(df, patient_data)
     print(rand_solution)
     print_solution(rand_solution)
-    print(routeLength(df, rand_solution))
+    print(get_cost(df, rand_solution))
     # print(getNeighbours(rand_solution))
     # print(getBestNeighbour(df, getNeighbours(rand_solution)))
 
