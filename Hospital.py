@@ -5,14 +5,14 @@ import math
 import random
 import numpy as np
 import matplotlib.pyplot as plt
+import time
 
 ######## READ DATA ###########
 Patient_data = pd.read_csv('Patient.csv')
 Rooms_data = pd.read_csv('Rooms.csv')
 
 ######## Variables ##########
-robot_speed = 6
-cost = 200
+
 random.seed(10)
 
 def init_rooms(Rooms_data):
@@ -78,13 +78,13 @@ def randomSolution(tsp):
 
     return solution
 
-def objective_function(tsp, solution, patients):
+def objective_function(tsp, solution, patients, robot_speed,cost):
     target_value = 0
-    time = 0
+    time_of = 0
     for i in range(len(solution)):
-        time += (tsp[solution[i - 1]][solution[i]] / robot_speed) + patients[solution[i-1]].type_of_disease
-        latency = max((time - patients[solution[i-1]].urgency),0)
-        target_value = (time + latency * cost)
+        time_of += (tsp[solution[i - 1]][solution[i]] / robot_speed) + patients[solution[i-1]].type_of_disease
+        latency = max((time_of - patients[solution[i-1]].urgency), 0)
+        target_value = (time_of + latency * cost)
     return target_value
 
 def getNeighbours(solution):
@@ -97,34 +97,37 @@ def getNeighbours(solution):
             neighbours.append(neighbour)
     return neighbours
 
-def getBestNeighbour(tsp, neighbours, patients):
-    bestRouteLength = objective_function(tsp, neighbours[0], patients)
+def getBestNeighbour(tsp, neighbours, patients, robot_speed,cost):
+    bestRouteLength = objective_function(tsp, neighbours[0], patients, robot_speed, cost)
     bestNeighbour = neighbours[0]
     for neighbour in neighbours:
-        currentRouteLength = objective_function(tsp, neighbour, patients)
+        currentRouteLength = objective_function(tsp, neighbour, patients, robot_speed, cost)
         if currentRouteLength < bestRouteLength:
             bestRouteLength = currentRouteLength
             bestNeighbour = neighbour
     return bestNeighbour, bestRouteLength
 
-def hillClimbing(tsp, patients):
+def hillClimbing(tsp, patients, robot_speed, cost, max_time):
     currentSolution = randomSolution(tsp)
-    currentRouteLength = objective_function(tsp, currentSolution, patients)
+    currentRouteLength = objective_function(tsp, currentSolution, patients, robot_speed, cost)
     neighbours = getNeighbours(currentSolution)
-    bestNeighbour, bestNeighbourRouteLength = getBestNeighbour(tsp, neighbours,patients)
-
-    while bestNeighbourRouteLength < currentRouteLength:
+    bestNeighbour, bestNeighbourRouteLength = getBestNeighbour(tsp, neighbours,patients, robot_speed, cost)
+    start_time = time.time()
+    # while bestNeighbourRouteLength < currentRouteLength: ## change to run-rime
+    while not isDone(start_time, max_time): ## checks if the algorithm has more
         currentSolution = bestNeighbour
         currentRouteLength = bestNeighbourRouteLength
         neighbours = getNeighbours(currentSolution)
-        bestNeighbour, bestNeighbourRouteLength = getBestNeighbour(tsp, neighbours, patients)
+        bestNeighbour, bestNeighbourRouteLength = getBestNeighbour(tsp, neighbours, patients, robot_speed, cost)
 
     return currentSolution, currentRouteLength
 
+def isDone(start_time, max_time):
+    return time.time() - start_time > max_time
 
-def hill_climb_algorithm(matrix, patients):
+def hill_climb_algorithm(matrix, patients, robot_speed, cost, max_time):
     tsp = matrix.values.tolist()
-    return(hillClimbing(tsp, patients))
+    return(hillClimbing(tsp, patients, robot_speed, cost, max_time))
 
 def patient_to_room_arr(pat_arr,patient_data):
     room_arr = []
@@ -133,7 +136,7 @@ def patient_to_room_arr(pat_arr,patient_data):
     # room_arr.append(patient_data[pat_arr[0]].room.get_loc())
     for patient in pat_arr:
         room_arr.append(patient_data[patient].room.get_loc())
-    print(room_arr)
+    # print(room_arr)
     for cord in room_arr:
         x_arr.append(cord[0])
         y_arr.append(cord[1])
@@ -151,7 +154,6 @@ def patient_to_room_arr(pat_arr,patient_data):
     plt.show()
     for i in range(0,len(x_arr)-1):
         j = i
-        print(i,j)
         if j >= (len(x_arr)-1):
             break
         while x_arr[i] == x_arr[j+1] and y_arr[i] == y_arr[j+1]:
@@ -179,10 +181,13 @@ if __name__ == '__main__':
     patient_data = init_patient(Patient_data, room_data)
     rooms_dist_matrix = room_distance_matrix(room_data)
     patients_dist_matrix = patient_distance_matrix(patient_data)
+    robot_speed= 6
+    cost = 200
     # plotonimage(room_data)
-    hill_climb_result = hill_climb_algorithm(patients_dist_matrix, patient_data)
-    print(hill_climb_result)
+    # for robot_speed in range(2,10):
+    #     for cost in range(0,500,50):
+    for max_time in range(0,10,1):
+        hill_climb_result = hill_climb_algorithm(patients_dist_matrix, patient_data, robot_speed,cost, max_time)
+        print(hill_climb_result)
+
     patient_to_room_arr(hill_climb_result[0],patient_data)
-
-
-
