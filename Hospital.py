@@ -186,7 +186,7 @@ if __name__ == '__main__':
     # plotonimage(room_data)
     # for robot_speed in range(2,10):
     #     for cost in range(0,500,50):
-    for max_time in range(0,10,1):
+    for max_time in range(0,181,60):
         hill_climb_result = hill_climb_algorithm(patients_dist_matrix, patient_data, robot_speed,cost, max_time)
         print(hill_climb_result)
 
