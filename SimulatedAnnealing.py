@@ -24,19 +24,16 @@ MAX_TIME = 10000
 
 
 def init_rooms(Rooms_data):
-    """ Returns dictionary of the rooms from csv file"""
     room_dict = {}
     for room in Rooms_data.iterrows():
-        room_dict[room[1]['id']] = Room(room[1]['id'], room[1]['x'], room[1]['y'])
+        room_dict[room[1]['id']] = Room(room[1]['id'],room[1]['x'],room[1]['y'])
     return room_dict
 
 
-def init_patient(Patient_data, r_data):
-    """ Returns dictionary of the patients from csv file"""
+def init_patient(Patient_data,r_data):
     patient_array = []
     for patient in Patient_data.iterrows():
-        patient_array.append(
-            Patient(patient[1]['id'], r_data[patient[1]['room']], patient[1]['urgency'], patient[1]['typeofdisease']))
+        patient_array.append(Patient(patient[1]['id'],r_data[patient[1]['room']],patient[1]['urgency'], patient[1]['typeofdisease']))
     return patient_array
 
 
