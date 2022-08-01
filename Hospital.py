@@ -9,11 +9,11 @@ import time
 
 ######## READ DATA ###########
 Patient_data = pd.read_csv('Patient10.csv')
-Rooms_data = pd.read_csv('Rooms10.csv')
+Rooms_data = pd.read_csv('Rooms.csv')
 
 ######## Variables ##########
 
-# random.seed(10)
+random.seed(10)
 
 def init_rooms(Rooms_data):
     room_dict = {}
@@ -190,7 +190,7 @@ if __name__ == '__main__':
     robot_speed= 6
     cost = 200
     time_limit = False
-    plotonimage(room_data)
+    # plotonimage(room_data)
     # for robot_speed in range(2,10):
     #     for cost in range(0,500,50):
     for max_time in range(5,9,5):
