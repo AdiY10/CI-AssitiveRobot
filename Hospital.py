@@ -8,12 +8,12 @@ import matplotlib.pyplot as plt
 import time
 
 ######## READ DATA ###########
-Patient_data = pd.read_csv('Patient.csv')
-Rooms_data = pd.read_csv('Rooms.csv')
+Patient_data = pd.read_csv('Patient10.csv')
+Rooms_data = pd.read_csv('Rooms10.csv')
 
 ######## Variables ##########
 
-random.seed(10)
+# random.seed(10)
 
 def init_rooms(Rooms_data):
     room_dict = {}
@@ -107,27 +107,33 @@ def getBestNeighbour(tsp, neighbours, patients, robot_speed,cost):
             bestNeighbour = neighbour
     return bestNeighbour, bestRouteLength
 
-def hillClimbing(tsp, patients, robot_speed, cost, max_time):
+def hillClimbing(tsp, patients, robot_speed, cost, max_time, time_limit):
     currentSolution = randomSolution(tsp)
     currentRouteLength = objective_function(tsp, currentSolution, patients, robot_speed, cost)
     neighbours = getNeighbours(currentSolution)
     bestNeighbour, bestNeighbourRouteLength = getBestNeighbour(tsp, neighbours,patients, robot_speed, cost)
     start_time = time.time()
-    # while bestNeighbourRouteLength < currentRouteLength: ## change to run-rime
-    while not isDone(start_time, max_time): ## checks if the algorithm has more
-        currentSolution = bestNeighbour
-        currentRouteLength = bestNeighbourRouteLength
-        neighbours = getNeighbours(currentSolution)
-        bestNeighbour, bestNeighbourRouteLength = getBestNeighbour(tsp, neighbours, patients, robot_speed, cost)
-
+    if time_limit:
+        while not isDone(start_time, max_time):  ## checks if the algorithm has more time to run
+            neighbours = getNeighbours(currentSolution)
+            bestNeighbour, bestNeighbourRouteLength = getBestNeighbour(tsp, neighbours, patients, robot_speed, cost)
+            if bestNeighbourRouteLength < currentRouteLength:
+                currentRouteLength = bestNeighbourRouteLength
+                currentSolution = bestNeighbour
+    else:
+        while bestNeighbourRouteLength < currentRouteLength:
+            currentSolution = bestNeighbour
+            currentRouteLength = bestNeighbourRouteLength
+            neighbours = getNeighbours(currentSolution)
+            bestNeighbour, bestNeighbourRouteLength = getBestNeighbour(tsp, neighbours, patients, robot_speed, cost)
     return currentSolution, currentRouteLength
 
 def isDone(start_time, max_time):
     return time.time() - start_time > max_time
 
-def hill_climb_algorithm(matrix, patients, robot_speed, cost, max_time):
+def hill_climb_algorithm(matrix, patients, robot_speed, cost, max_time, time_limit):
     tsp = matrix.values.tolist()
-    return(hillClimbing(tsp, patients, robot_speed, cost, max_time))
+    return(hillClimbing(tsp, patients, robot_speed, cost, max_time, time_limit))
 
 def patient_to_room_arr(pat_arr,patient_data):
     room_arr = []
@@ -149,7 +155,7 @@ def patient_to_room_arr(pat_arr,patient_data):
     pos_y = y_arr[:-1] + v / 2
     norm = np.sqrt(abs(u * 2 + v * 2))
     ax.plot(x_arr, y_arr, marker="o")
-    ax.quiver(pos_x, pos_y, u / norm, v / norm, angles="xy", zorder=5, pivot='mid')
+    # ax.quiver(pos_x, pos_y, u / norm, v / norm, angles="xy", zorder=5, pivot='mid')
     plt.title("Path to Rooms")
     plt.show()
     for i in range(0,len(x_arr)-1):
@@ -172,7 +178,7 @@ def patient_to_room_arr(pat_arr,patient_data):
     pos_y = y_arr[:-1] + v / 2
     norm = np.sqrt(abs(u * 2 + v * 2))
     ax.plot(x_arr, y_arr, marker="o")
-    ax.quiver(pos_x, pos_y, u / norm, v / norm, angles="xy", zorder=5, pivot='mid')
+    # ax.quiver(pos_x, pos_y, u / norm, v / norm, angles="xy", zorder=5, pivot='mid')
     plt.title("Path to Patients")
     plt.show()
 
@@ -183,11 +189,12 @@ if __name__ == '__main__':
     patients_dist_matrix = patient_distance_matrix(patient_data)
     robot_speed= 6
     cost = 200
-    # plotonimage(room_data)
+    time_limit = False
+    plotonimage(room_data)
     # for robot_speed in range(2,10):
     #     for cost in range(0,500,50):
-    for max_time in range(0,181,60):
-        hill_climb_result = hill_climb_algorithm(patients_dist_matrix, patient_data, robot_speed,cost, max_time)
+    for max_time in range(5,9,5):
+        hill_climb_result = hill_climb_algorithm(patients_dist_matrix, patient_data, robot_speed, cost, max_time, time_limit)
         print(hill_climb_result)
 
     patient_to_room_arr(hill_climb_result[0],patient_data)
