@@ -12,7 +12,8 @@ Patient_data = pd.read_csv('Patient10.csv')
 Rooms_data = pd.read_csv('Rooms.csv')
 
 ######## Variables ##########
-
+robot_speed = 6
+cost = 0
 random.seed(10)
 
 def init_rooms(Rooms_data):
@@ -30,7 +31,6 @@ def init_patient(Patient_data,r_data):
 
 def calc_dist(room1 , room2):
     return(math.sqrt(((room1[0] - room2[0])**2) + ((room1[1] - room2[1])**2)))
-
 
 
 def room_distance_matrix(room_data):
@@ -70,7 +70,6 @@ def patient_distance_matrix(patient_data):
 def randomSolution(tsp):
     patients = list(range(len(tsp)))
     solution = []
-
     for i in range(len(tsp)):
         random_patient = patients[random.randint(0, len(patients) - 1)]
         solution.append(random_patient)
@@ -187,8 +186,6 @@ if __name__ == '__main__':
     patient_data = init_patient(Patient_data, room_data)
     rooms_dist_matrix = room_distance_matrix(room_data)
     patients_dist_matrix = patient_distance_matrix(patient_data)
-    robot_speed= 6
-    cost = 200
     time_limit = False
     # plotonimage(room_data)
     # for robot_speed in range(2,10):
