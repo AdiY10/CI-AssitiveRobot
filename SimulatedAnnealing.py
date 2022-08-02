@@ -10,11 +10,19 @@ import numpy as np
 import random
 import time
 import decimal
+from Patient import Patient
+from Room import Room
+import pandas as pd
+import math
+import random
+import numpy as np
+import matplotlib.pyplot as plt
+import time
 
 random.seed(10)
 
 ######## READ DATA ###########
-Patient_data = pd.read_csv('Patient10.csv')
+Patient_data = pd.read_csv('Patient50.csv')
 Rooms_data = pd.read_csv('Rooms.csv')
 
 ######## Variables ##########
@@ -26,14 +34,15 @@ MAX_TIME = 10000
 def init_rooms(Rooms_data):
     room_dict = {}
     for room in Rooms_data.iterrows():
-        room_dict[room[1]['id']] = Room(room[1]['id'],room[1]['x'],room[1]['y'])
+        room_dict[room[1]['id']] = Room(room[1]['id'], room[1]['x'], room[1]['y'])
     return room_dict
 
 
-def init_patient(Patient_data,r_data):
+def init_patient(Patient_data, r_data):
     patient_array = []
     for patient in Patient_data.iterrows():
-        patient_array.append(Patient(patient[1]['id'],r_data[patient[1]['room']],patient[1]['urgency'], patient[1]['typeofdisease']))
+        patient_array.append(
+            Patient(patient[1]['id'], r_data[patient[1]['room']], patient[1]['urgency'], patient[1]['typeofdisease']))
     return patient_array
 
 
@@ -50,6 +59,7 @@ def distance_matrix(room_data):
         for j in room_data.keys():
             df.at[i, j] = calc_dist(room_data[i].get_loc(), room_data[j].get_loc())
     return df
+
 
 # todo: we start from P0 or P1??????????????
 def patient_distance_matrix(patient_data):
@@ -103,6 +113,8 @@ def random_solution(matrix):
     return solution
 
 
+
+
 def get_neighbors(solution):
     """ Returns a list of possible neighbors to current solution"""
     neighbours = []
@@ -131,7 +143,7 @@ def isDone(start_time, max_time):
 
 
 def simulated_annealing(tsp, patients, robot_speed, C, max_time, initial_state, initial_temp=90, final_temp=0.1,
-                        alpha=0.01, time_limit = False):
+                        alpha=0.01, time_limit=False):
     """ Find optimal solution by Simulated Annealing Heuristic"""
     print("Starting SA")
 
@@ -142,10 +154,10 @@ def simulated_annealing(tsp, patients, robot_speed, C, max_time, initial_state, 
     current_temp = initial_temp
     current_state = initial_state
     solution = current_state
+    current_best = solution
 
     if time_limit:
         start_time = time.time()
-        current_best = solution
         while current_temp > final_temp and not isDone(start_time, max_time):
             neighbor = random.choice(get_neighbors(solution))
             # Check if neighbor is best so far
@@ -160,7 +172,7 @@ def simulated_annealing(tsp, patients, robot_speed, C, max_time, initial_state, 
                 current_best = solution
             # if the new solution is not better, accept it with a probability of e^(-cost/temp)
             else:
-                if random.uniform(0, 1) < decimal.Decimal((-1*cost_diff)/current_temp).exp():
+                if random.uniform(0, 1) < decimal.Decimal((-1 * cost_diff) / current_temp).exp():
                     solution = neighbor
             # decrement the temperature
             current_temp -= alpha
@@ -178,29 +190,43 @@ def simulated_annealing(tsp, patients, robot_speed, C, max_time, initial_state, 
             neighbor = random.choice(get_neighbors(solution))
 
             # Check if neighbor is best so far
-            cost_diff = objective_function(tsp, current_state, patients, robot_speed, C) - objective_function(tsp, neighbor,
+            cost_diff = objective_function(tsp, current_state, patients, robot_speed, C) - objective_function(tsp,
+                                                                                                              neighbor,
                                                                                                               patients,
                                                                                                               robot_speed,
                                                                                                               C)
             # if the new solution is better, accept it
-            if cost_diff > 0:
+            if cost_diff >= 0:
                 solution = neighbor
+                current_best = solution
+                print('found better')
             # if the new solution is not better, accept it with a probability of e^(-cost/temp)
+
             else:
-                if random.uniform(0, 1) < decimal.Decimal((-1*cost_diff)/current_temp).exp():
+                # print(decimal.Decimal((cost_diff) / current_temp).exp())
+                print(math.exp(cost_diff / current_temp))
+                # if random.uniform(0, 1) < decimal.Decimal((-1 * cost_diff) / current_temp).exp():
+                if random.uniform(0, 1) < math.exp(cost_diff / current_temp):
                     solution = neighbor
             # decrement the temperature
             current_temp -= alpha
+
+        if objective_function(tsp, current_best, patients, robot_speed, C) < objective_function(tsp,
+                                                                                                solution,
+                                                                                                patients,
+                                                                                                robot_speed,
+                                                                                                C):
+            solution = current_best
 
     print(solution)
     print(objective_function(tsp, solution, patients, robot_speed, C))
     return solution, objective_function(tsp, solution, patients, robot_speed, C)
 
 
-def patient_to_room_arr(pat_arr,patient_data):
+def patient_to_room_arr(pat_arr, patient_data):
     room_arr = []
     x_arr = []
-    y_arr =[]
+    y_arr = []
     # room_arr.append(patient_data[pat_arr[0]].room.get_loc())
     for patient in pat_arr:
         room_arr.append(patient_data[patient].room.get_loc())
@@ -220,14 +246,14 @@ def patient_to_room_arr(pat_arr,patient_data):
     # ax.quiver(pos_x, pos_y, u / norm, v / norm, angles="xy", zorder=5, pivot='mid')
     plt.title("Path to Rooms")
     plt.show()
-    for i in range(0,len(x_arr)-1):
+    for i in range(0, len(x_arr) - 1):
         j = i
-        if j >= (len(x_arr)-1):
+        if j >= (len(x_arr) - 1):
             break
-        while x_arr[i] == x_arr[j+1] and y_arr[i] == y_arr[j+1]:
+        while x_arr[i] == x_arr[j + 1] and y_arr[i] == y_arr[j + 1]:
             x_arr[j + 1] = x_arr[j + 1] + 3
             y_arr[j + 1] = y_arr[j + 1] + 3
-            if (j+1) < (len(x_arr) - 1):
+            if (j + 1) < (len(x_arr) - 1):
                 j = j + 1
             else:
                 break
@@ -260,9 +286,23 @@ if __name__ == '__main__':
 
     rand_solution = random_solution(time_matrix)
     print(rand_solution)
-    print(len(rand_solution))
-
     print(objective_function(time_matrix, rand_solution, patient_data, robot_speed, c))
 
-    solution, z = simulated_annealing(time_matrix, patient_data, robot_speed, c, max_time, rand_solution)
+    # solution, z = simulated_annealing(time_matrix, patient_data, robot_speed, c, max_time, rand_solution,
+    #                                   initial_temp=400, final_temp=0.01,
+    #                                   alpha=0.001, time_limit=False)
+    # print(solution)
+    # print(patient_data)
+    # patient_to_room_arr(solution, patient_data)
+
+    from SA import SimulatedAnnealing
+
+    sa = SimulatedAnnealing(tsp=time_matrix, patients=patient_data, robot_speed=robot_speed, cost=c,
+                             initialTemp=90, finalTemp=0.01, tempReduction="linear",
+                            iterationPerTemp=100, alpha=0.99, beta=5)
+
+    solution, z = sa.run()
+    print(solution)
+    print(z)
+
     patient_to_room_arr(solution, patient_data)
