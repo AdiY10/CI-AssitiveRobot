@@ -4,8 +4,10 @@ Simulated Annealing Class
 import random
 import math
 import time
+import matplotlib.pyplot as plt
 
 random.seed(10)
+
 
 def randomSolution(tsp):
     patients = list(range(len(tsp)))
@@ -52,15 +54,15 @@ class SimulatedAnnealing:
     def slowDecreaseTempReduction(self):
         self.currTemp = self.currTemp / (1 + self.beta * self.currTemp)
 
-    def isTerminationCriteriaMet(self, max_time, time_limit, start_time):
-        if time_limit:
-            return self.currTemp <= self.finalTemp or self.get_neighbors(self.solution) == 0 or self.isDone(start_time,
-                                                                                                            max_time)
+    def isTerminationCriteriaMet(self, max_iter, iter_limit, current_iter):
+        if iter_limit:
+            return self.currTemp <= self.finalTemp or self.get_neighbors(self.solution) == 0 or self.isDone(current_iter,
+                                                                                                            max_iter)
         else:
             return self.currTemp <= self.finalTemp or self.get_neighbors(self.solution) == 0
 
-    def isDone(self, start_time, max_time):
-        return time.time() - start_time > max_time
+    def isDone(self, curr_iter, max_iter):
+        return curr_iter > max_iter
 
     def get_neighbors(self, solution):
         """ Returns a list of possible neighbors to current solution"""
@@ -83,9 +85,13 @@ class SimulatedAnnealing:
             target_value = (time_of + latency * self.cost)
         return target_value
 
-    def run(self, max_time=10000, time_limit=False):
+    def run(self, max_iter=200, iter_limit=False):
         start_time = time.time()
-        while not self.isTerminationCriteriaMet(max_time, time_limit, start_time):
+        z_list = []
+        temp_list = []
+        curr_iter = 0
+        bestSolution = self.solution
+        while not self.isTerminationCriteriaMet(max_iter, iter_limit, curr_iter):
             # iterate that number of times
             for i in range(self.iterationPerTemp):
                 # get all of the neighbors
@@ -97,6 +103,7 @@ class SimulatedAnnealing:
                 # if the new solution is better, accept it
                 if cost >= 0:
                     self.solution = newSolution
+
                     # print('found better')
                 # if the new solution is not better, accept it with a probability of e^(-cost/temp)
                 else:
@@ -104,8 +111,31 @@ class SimulatedAnnealing:
                     if random.uniform(0, 1) < math.exp(cost / self.currTemp):
                         print(math.exp(cost / self.currTemp))
                         self.solution = newSolution
+
+                if self.objective_function(self.solution) < self.objective_function(bestSolution):
+                    bestSolution = self.solution
+
+            z_list.append(self.objective_function(self.solution))
+            temp_list.append(curr_iter)
+
             # decrement the temperature
             self.decrementRule()
-            print(self.objective_function(self.solution), ", temp: ", self.currTemp )
-        print(f'run time: {time.time()-start_time}')
-        return [self.solution, self.objective_function(self.solution)]
+
+            curr_iter = curr_iter + 1
+
+            print(self.objective_function(self.solution), ", temp: ", self.currTemp)
+        print(f'run time: {time.time() - start_time}')
+        self.plot_ZtoTEMP_sa(z_list, temp_list)
+        return {'solution': bestSolution, 'z': self.objective_function(bestSolution), 'z_list': z_list,
+                'temp_list': temp_list}
+
+
+    def plot_ZtoTEMP_sa(self, z_l, temp_l):
+        # fig = plt.figure()
+        # ax = fig.add_subplot()
+        plt.plot(temp_l, z_l)
+        plt.title('Simulated Annealing with Best Parameters')
+        plt.xlabel('Iteration')
+        plt.ylabel('Objective Function')
+        plt.ticklabel_format(useOffset=False)
+        plt.show()

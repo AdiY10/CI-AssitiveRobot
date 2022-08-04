@@ -9,12 +9,12 @@ import time
 from SA import SimulatedAnnealing
 
 ######## READ DATA ###########
-Patient_data = pd.read_csv('Patient10.csv')
+Patient_data = pd.read_csv('Patient100.csv')
 Rooms_data = pd.read_csv('Rooms.csv')
 
 ######## Variables ##########
 robot_speed = 6
-cost = 0
+cost = 200
 random.seed(10)
 
 def init_rooms(Rooms_data):
@@ -199,6 +199,7 @@ def sa_tune():
                 sa_result = sa.run()
                 print(f'intialTemp: {it}, alpha: {alph}, tempRduction: {tr} | z = {sa_result[1]} \n --path: {sa_result[0]}')
 
+
 if __name__ == '__main__':
     room_data = init_rooms(Rooms_data)
     patient_data = init_patient(Patient_data, room_data)
@@ -212,15 +213,15 @@ if __name__ == '__main__':
     #     hill_climb_result = hill_climb_algorithm(patients_dist_matrix, patient_data, robot_speed, cost, max_time, time_limit)
     #     print(hill_climb_result)
 
-    # sa = SimulatedAnnealing(tsp=patients_dist_matrix, patients=patient_data, robot_speed=robot_speed,
-    #                         cost=cost,
-    #                         initialTemp=20, finalTemp=0.01, tempReduction='geometric',
-    #                         iterationPerTemp=1, alpha=0.99, beta=5)
-    #
-    # sa_result = sa.run()
-    # print(sa_result)
+    sa = SimulatedAnnealing(tsp=patients_dist_matrix, patients=patient_data, robot_speed=robot_speed,
+                            cost=cost,
+                            initialTemp=30, finalTemp=0.01, tempReduction='geometric',
+                            iterationPerTemp=100, alpha=0.99, beta=5)
+
+    sa_result = sa.run(200, True)
+    print(sa_result['solution'], "\n", sa_result['z'])
+    # sa.plot_ZtoTEMP_sa(sa_result['z_list'], sa_result['temp_list'])
     # patient_to_room_arr(sa_result[0],patient_data)
 
-    hill_climb_result = hill_climb_algorithm(patients_dist_matrix, patient_data, robot_speed, cost, 10,
-                                             False)
-    print(hill_climb_result)
+    # hill_climb_result = hill_climb_algorithm(patients_dist_matrix, patient_data, robot_speed, cost, 10, False)
+    # print(hill_climb_result)
