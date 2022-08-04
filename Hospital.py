@@ -14,6 +14,7 @@ Rooms_data = pd.read_csv('Rooms.csv')
 ######## Variables ##########
 robot_speed = 6
 cost = 0
+
 random.seed(10)
 
 def init_rooms(Rooms_data):
