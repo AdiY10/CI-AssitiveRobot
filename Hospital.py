@@ -6,6 +6,7 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 import time
+from SA import SimulatedAnnealing
 
 ######## READ DATA ###########
 Patient_data = pd.read_csv('Patient100.csv')
@@ -13,8 +14,7 @@ Rooms_data = pd.read_csv('Rooms.csv')
 
 ######## Variables ##########
 robot_speed = 6
-cost = 0
-
+cost = 200
 random.seed(10)
 
 def init_rooms(Rooms_data):
@@ -32,6 +32,7 @@ def init_patient(Patient_data,r_data):
 
 def calc_dist(room1 , room2):
     return(math.sqrt(((room1[0] - room2[0])**2) + ((room1[1] - room2[1])**2)))
+
 
 
 def room_distance_matrix(room_data):
@@ -71,6 +72,7 @@ def patient_distance_matrix(patient_data):
 def randomSolution(tsp):
     patients = list(range(len(tsp)))
     solution = []
+
     for i in range(len(tsp)):
         random_patient = patients[random.randint(0, len(patients) - 1)]
         solution.append(random_patient)
@@ -182,6 +184,22 @@ def patient_to_room_arr(pat_arr,patient_data):
     plt.title("Path to Patients")
     plt.show()
 
+def sa_tune():
+    initial_temp = [10, 30, 50]
+    alpha_list = [0.1, 0.99]
+    temp_reduction = ['geometric', 'linear']
+    for it in initial_temp:
+        for alph in alpha_list:
+            for tr in temp_reduction:
+                sa = SimulatedAnnealing(tsp=patients_dist_matrix, patients=patient_data, robot_speed=robot_speed,
+                                        cost=cost,
+                                        initialTemp=it, finalTemp=0.01, tempReduction=tr,
+                                        iterationPerTemp=100, alpha=alph, beta=5)
+
+                sa_result = sa.run()
+                print(f'intialTemp: {it}, alpha: {alph}, tempRduction: {tr} | z = {sa_result[1]} \n --path: {sa_result[0]}')
+
+
 if __name__ == '__main__':
     room_data = init_rooms(Rooms_data)
     patient_data = init_patient(Patient_data, room_data)
@@ -191,8 +209,19 @@ if __name__ == '__main__':
     # plotonimage(room_data)
     # for robot_speed in range(2,10):
     #     for cost in range(0,500,50):
-    for max_time in range(5,9,5):
-        hill_climb_result = hill_climb_algorithm(patients_dist_matrix, patient_data, robot_speed, cost, max_time, time_limit)
-        print(hill_climb_result)
+    # for max_time in range(5,9,5):
+    #     hill_climb_result = hill_climb_algorithm(patients_dist_matrix, patient_data, robot_speed, cost, max_time, time_limit)
+    #     print(hill_climb_result)
 
-    patient_to_room_arr(hill_climb_result[0],patient_data)
+    sa = SimulatedAnnealing(tsp=patients_dist_matrix, patients=patient_data, robot_speed=robot_speed,
+                            cost=cost,
+                            initialTemp=30, finalTemp=0.01, tempReduction='geometric',
+                            iterationPerTemp=100, alpha=0.99, beta=5)
+
+    sa_result = sa.run(200, True)
+    print(sa_result['solution'], "\n", sa_result['z'])
+    # sa.plot_ZtoTEMP_sa(sa_result['z_list'], sa_result['temp_list'])
+    # patient_to_room_arr(sa_result[0],patient_data)
+
+    # hill_climb_result = hill_climb_algorithm(patients_dist_matrix, patient_data, robot_speed, cost, 10, False)
+    # print(hill_climb_result)
