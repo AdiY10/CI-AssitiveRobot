@@ -218,7 +218,7 @@ if __name__ == '__main__':
                             initialTemp=30, finalTemp=0.01, tempReduction='geometric',
                             iterationPerTemp=100, alpha=0.99, beta=5)
 
-    sa_result = sa.run(200, True)
+    sa_result = sa.run(200, False)
     print(sa_result['solution'], "\n", sa_result['z'])
     # sa.plot_ZtoTEMP_sa(sa_result['z_list'], sa_result['temp_list'])
     # patient_to_room_arr(sa_result[0],patient_data)

@@ -10,6 +10,11 @@ random.seed(10)
 
 
 def randomSolution(tsp):
+    """
+    Returns a random initial solution
+    :param tsp: the distance matrix
+    :return: list of patients order.
+    """
     patients = list(range(len(tsp)))
     solution = []
 
@@ -55,7 +60,14 @@ class SimulatedAnnealing:
         self.currTemp = self.currTemp / (1 + self.beta * self.currTemp)
 
     def isTerminationCriteriaMet(self, max_iter, iter_limit, current_iter):
-        if iter_limit:
+        """
+        Returns a boolean, whether the algorithm should finish the run or not.
+        :param max_iter: Number of iterations
+        :param iter_limit: Boolean -> whether to use iterations constarint or not.
+        :param current_iter: int -> current iteration number
+        :return: True or False
+        """
+        if iter_limit:    # if iterations constraint is applied.
             return self.currTemp <= self.finalTemp or self.get_neighbors(self.solution) == 0 or self.isDone(current_iter,
                                                                                                             max_iter)
         else:
@@ -76,6 +88,11 @@ class SimulatedAnnealing:
         return neighbours
 
     def objective_function(self, solution):
+        """
+        Returns the value of our objective function
+        :param solution: list of patients
+        :return: float.
+        """
         target_value = 0
         time_of = 0
         for i in range(len(solution)):
@@ -86,6 +103,12 @@ class SimulatedAnnealing:
         return target_value
 
     def run(self, max_iter=200, iter_limit=False):
+        """
+        Execute the SA algorithm
+        :param max_iter: max iterations
+        :param iter_limit: Apply iterations constraint (bool)
+        :return: solution
+        """
         start_time = time.time()
         z_list = []
         temp_list = []
