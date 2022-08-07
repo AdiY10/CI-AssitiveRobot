@@ -70,6 +70,7 @@ def patient_distance_matrix(patient_data):
 
 
 def randomSolution(tsp):
+    """creating a random solution for lower-bound"""
     patients = list(range(len(tsp)))
     solution = []
 
@@ -81,6 +82,7 @@ def randomSolution(tsp):
     return solution
 
 def objective_function(tsp, solution, patients, robot_speed,cost):
+    """Calculating objective function for each scenario"""
     target_value = 0
     time_of = 0
     for i in range(len(solution)):
@@ -90,6 +92,7 @@ def objective_function(tsp, solution, patients, robot_speed,cost):
     return target_value
 
 def getNeighbours(solution):
+    """searching for all neighbours"""
     neighbours = []
     for i in range(len(solution)):
         for j in range(i + 1, len(solution)):
@@ -100,6 +103,7 @@ def getNeighbours(solution):
     return neighbours
 
 def getBestNeighbour(tsp, neighbours, patients, robot_speed,cost):
+    """Looking for the best neighbour"""
     bestRouteLength = objective_function(tsp, neighbours[0], patients, robot_speed, cost)
     bestNeighbour = neighbours[0]
     for neighbour in neighbours:
@@ -110,12 +114,14 @@ def getBestNeighbour(tsp, neighbours, patients, robot_speed,cost):
     return bestNeighbour, bestRouteLength
 
 def hillClimbing(tsp, patients, robot_speed, cost, max_time, time_limit):
+    """Hill Climb algorithm"""
     currentSolution = randomSolution(tsp)
     currentRouteLength = objective_function(tsp, currentSolution, patients, robot_speed, cost)
     neighbours = getNeighbours(currentSolution)
     bestNeighbour, bestNeighbourRouteLength = getBestNeighbour(tsp, neighbours,patients, robot_speed, cost)
     start_time = time.time()
     if time_limit:
+        """If the stop criterion is time"""
         while not isDone(start_time, max_time):  ## checks if the algorithm has more time to run
             neighbours = getNeighbours(currentSolution)
             bestNeighbour, bestNeighbourRouteLength = getBestNeighbour(tsp, neighbours, patients, robot_speed, cost)
@@ -123,6 +129,7 @@ def hillClimbing(tsp, patients, robot_speed, cost, max_time, time_limit):
                 currentRouteLength = bestNeighbourRouteLength
                 currentSolution = bestNeighbour
     else:
+        """If the stop criterion is improvement"""
         while bestNeighbourRouteLength < currentRouteLength:
             currentSolution = bestNeighbour
             currentRouteLength = bestNeighbourRouteLength
@@ -131,13 +138,16 @@ def hillClimbing(tsp, patients, robot_speed, cost, max_time, time_limit):
     return currentSolution, currentRouteLength
 
 def isDone(start_time, max_time):
+    """Checking if time limit as achieved"""
     return time.time() - start_time > max_time
 
 def hill_climb_algorithm(matrix, patients, robot_speed, cost, max_time, time_limit):
+    """Running Hill climb Algorithm"""
     tsp = matrix.values.tolist()
     return(hillClimbing(tsp, patients, robot_speed, cost, max_time, time_limit))
 
 def patient_to_room_arr(pat_arr,patient_data):
+    """creating a plot with the robot path"""
     room_arr = []
     x_arr = []
     y_arr =[]
@@ -185,6 +195,7 @@ def patient_to_room_arr(pat_arr,patient_data):
     plt.show()
 
 def sa_tune():
+    """Tune SA Hyper-parameters"""
     initial_temp = [10, 30, 50]
     alpha_list = [0.1, 0.99]
     temp_reduction = ['geometric', 'linear']
@@ -209,9 +220,9 @@ if __name__ == '__main__':
     # plotonimage(room_data)
     # for robot_speed in range(2,10):
     #     for cost in range(0,500,50):
-    # for max_time in range(5,9,5):
-    #     hill_climb_result = hill_climb_algorithm(patients_dist_matrix, patient_data, robot_speed, cost, max_time, time_limit)
-    #     print(hill_climb_result)
+    for max_time in range(5,9,5):
+        hill_climb_result = hill_climb_algorithm(patients_dist_matrix, patient_data, robot_speed, cost, max_time, time_limit)
+        print(hill_climb_result)
 
     sa = SimulatedAnnealing(tsp=patients_dist_matrix, patients=patient_data, robot_speed=robot_speed,
                             cost=cost,
