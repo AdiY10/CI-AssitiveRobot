@@ -6,11 +6,11 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 import time
-from SA import SimulatedAnnealing
+from Algorithms.SA import SimulatedAnnealing
 
 ######## READ DATA ###########
-Patient_data = pd.read_csv('Patient100.csv')
-Rooms_data = pd.read_csv('Rooms.csv')
+Patient_data = pd.read_csv('Data/Patient100.csv')
+Rooms_data = pd.read_csv('Data/Rooms.csv')
 
 ######## Variables ##########
 robot_speed = 6

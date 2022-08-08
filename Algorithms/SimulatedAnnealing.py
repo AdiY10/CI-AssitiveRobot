@@ -22,8 +22,8 @@ import time
 random.seed(10)
 
 ######## READ DATA ###########
-Patient_data = pd.read_csv('Patient50.csv')
-Rooms_data = pd.read_csv('Rooms.csv')
+Patient_data = pd.read_csv('../Data/Patient50.csv')
+Rooms_data = pd.read_csv('../Data/Rooms.csv')
 
 ######## Variables ##########
 ROBOT_SPEED = 6
